@@ -17,32 +17,10 @@ from core import CheckSet
 none_missing = CheckSet().none_missing
 is_monotonic = CheckSet().is_monotonic
 is_shape = CheckSet().is_shape
-
-def unique_index(df):
-    """Assert that the index is unique"""
-    assert df.index.is_unique
-    return df
+unique_index = CheckSet().unique_index
+within_set = CheckSet().within_set
 
 
-def within_set(df, sl=None, items=None):
-    """
-    Assert that df is a subset of items
-
-    Parameters
-    ==========
-
-    df : DataFrame
-    sl : slice
-        Used to test a subset of the dataframe, using .iloc
-    items : dict
-        mapping of columns (k) to array-like of values (v) that
-        ``df[k]`` is expected to be a subset of
-    """
-    slc = sl or slice(None)
-    for k, v in items.items():
-        if not df[k].iloc[slc].isin(v).all():
-            raise AssertionError
-    return df
 
 class ResetSlice(object):
     pass

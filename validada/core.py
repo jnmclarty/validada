@@ -2,6 +2,7 @@
 from slicers import ix, SliceStore
 from functools import wraps
 from copy import copy
+from collections import Counter
 
 def _pull_out_ret(kwargs, dforig):
     try:
@@ -85,6 +86,17 @@ def _is_shape_ret(dforig, dfcheck, dfderive, *args, **kwargs):
     return _ret_proper_objects(_ret, ret_specd)   
 _is_shape_raize = _make_generic_raizer(_is_shape_ret)
 
+def _unique_index_ret(dforig, dfcheck, dfderive, *args, **kwargs):
+    
+    _ret, ret_specd = _pull_out_ret(kwargs, dforig)
+
+    ret_specd['obj'] = Counter(list(dfcheck.index))
+    ret_specd['ndframe'] = pd.Series(ret_specd['obj'])
+    ret_specd['bool'] = df.index.is_unique
+    
+    return _ret_proper_objects(_ret, ret_specd)   
+_unique_index_raize = _make_generic_raizer(_unique_index_ret)
+
 def _is_monotonic_ret(dforig, dfcheck, dfderive, *args, **kwargs):
 
     _ret, ret_specd = _pull_out_ret(kwargs, dforig)
@@ -118,7 +130,34 @@ def _is_monotonic_ret(dforig, dfcheck, dfderive, *args, **kwargs):
     
     return _ret_proper_objects(_ret, ret_specd)
 _is_monotonic_raize = _make_generic_raizer(_is_monotonic_ret)
-        
+
+def within_set(df, sl=None, items=None):
+
+    slc = sl or slice(None)
+    for k, v in items.items():
+        if not df[k].iloc[slc].isin(v).all():
+            raise AssertionError
+    return df
+
+def _within_set_ret(dforig, dfcheck, dfderive, *args, **kwargs):
+
+    _ret, ret_specd = _pull_out_ret(kwargs, dforig)
+    
+    increasing = _read_arg_or_kwarg(args, 0, kwargs, 'increasing', None)
+    strict = _read_arg_or_kwarg(args, 1, kwargs, 'strict', False)
+    items = _read_arg_or_kwarg(args, 2, kwargs, 'items', {k: (increasing, strict) for k in dfcheck})
+    
+    results = {}
+    for k, v in items.items():
+        results[k] = dfcheck[k].isin(v).all()
+            
+    ret_specd['obj'] = results
+    ret_specd['ndframe'] = pd.Series(results)
+    ret_specd['bool'] = list(results.values()).any()
+    
+    return _ret_proper_objects(_ret, ret_specd)
+_within_set_raize = _make_generic_raizer(_is_monotonic_ret)
+       
 def _acheck_ret(dforig, dfcheck, dfderive, *args, **kwargs):
     
     try:
@@ -231,6 +270,22 @@ class CheckSet(object):
 
     df: DataFrame
     shape : tuple (n_rows, n_columns)
+    """
+    
+    unique_index = _generic_check_maker(_unique_index_ret, _unique_index_raize)
+    unique_index.__doc__ = """Assert that the index is unique"""
+    
+    within_set = _generic_check_maker(_within_set_ret, _within_set_raize)
+    within_set.__doc__ = """
+    Assert that df is a subset of items
+
+    Parameters
+    ==========
+
+    df : DataFrame
+    items : dict
+        mapping of columns (k) to array-like of values (v) that
+        ``df[k]`` is expected to be a subset of
     """
     
     def decorator_maker(self, name, *args, **kwargs):
