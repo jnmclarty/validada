@@ -15,43 +15,8 @@ from copy import copy
 from core import CheckSet
 
 none_missing = CheckSet().none_missing
+is_monotonic = CheckSet().is_monotonic
 
-def is_monotonic(df, items=None, increasing=None, strict=False):
-    """
-    Asserts that the DataFrame is monotonic
-
-    Parameters
-    ==========
-
-    df : Series or DataFrame
-    items : dict
-        mapping columns to conditions (increasing, strict)
-    increasing : None or bool
-        None is either increasing or decreasing.
-    strict: whether the comparison should be strict
-    """
-    if items is None:
-        items = {k: (increasing, strict) for k in df}
-
-    for col, (increasing, strict) in items.items():
-        s = pd.Index(df[col])
-        if increasing:
-            good = getattr(s, 'is_monotonic_increasing')
-        elif increasing is None:
-            good = getattr(s, 'is_monotonic') | getattr(s, 'is_monotonic_decreasing')
-        else:
-            good = getattr(s, 'is_monotonic_decreasing')
-        if strict:
-            if increasing:
-                good = good & (s.to_series().diff().dropna() > 0).all()
-            elif increasing is None:
-                good = good & ((s.to_series().diff().dropna() > 0).all() |
-                               (s.to_series().diff().dropna() < 0).all())
-            else:
-                good = good & (s.to_series().diff().dropna() < 0).all()
-        if not good:
-            raise AssertionError
-    return df
 
 def is_shape(df, shape):
     """
