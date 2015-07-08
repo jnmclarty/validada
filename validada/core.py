@@ -45,6 +45,19 @@ def _ret_proper_objects(_ret, ret_specd):
     else:
         return tuple(ret)
 
+def _make_generic_raizer(returner):
+    def raizer(dforig, dfcheck, dfderive, *args, **kwargs):
+        
+        _raize, _raize_msg, kwargs = _pull_out_raize_kwargs(kwargs)
+        
+        _ret = ('bool',)
+        result = returner(dforig, dfcheck, dfderive, _ret=_ret, *args, **kwargs)
+        
+        if not result:
+            return dforig
+        else:
+            raise _raize(_raize_msg)
+    return raizer
 
 def _none_missing_ret(dforig, dfcheck, dfderive, *args, **kwargs):
     
@@ -57,18 +70,7 @@ def _none_missing_ret(dforig, dfcheck, dfderive, *args, **kwargs):
     ret_specd['bool'] = ret_specd['ndframe'].any()
     
     return _ret_proper_objects(_ret, ret_specd)
-
-def _none_missing_raize(dforig, dfcheck, dfderive, *args, **kwargs):
-    
-    _raize, _raize_msg, kwargs = _pull_out_raize_kwargs(kwargs)
-    
-    _ret = ('bool',)
-    result = _none_missing_ret(dforig, dfcheck, dfderive, _ret=_ret, *args, **kwargs)
-    
-    if not result:
-        return dforig
-    else:
-        raise _raize(_raize_msg)  
+_none_missing_raize = _make_generic_raizer(_none_missing_ret)
 
 def _is_shape_ret(dforig, dfcheck, dfderive, *args, **kwargs):
     
@@ -80,28 +82,16 @@ def _is_shape_ret(dforig, dfcheck, dfderive, *args, **kwargs):
     ret_specd['ndframe'] = "is_shape has no output ndframe"
     ret_specd['bool'] = dfcheck.shape == shape
     
-    return _ret_proper_objects(_ret, ret_specd)
-
-def _is_shape_raize(dforig, dfcheck, dfderive, *args, **kwargs):
-    
-    _raize, _raize_msg, kwargs = _pull_out_raize_kwargs(kwargs)
-    
-    _ret = ('bool',)
-    result = _none_missing_ret(dforig, dfcheck, dfderive, _ret=_ret, *args, **kwargs)
-    
-    if not result:
-        return dforig
-    else:
-        raise _raize(_raize_msg)  
-
+    return _ret_proper_objects(_ret, ret_specd)   
+_is_shape_raize = _make_generic_raizer(_is_shape_ret)
 
 def _is_monotonic_ret(dforig, dfcheck, dfderive, *args, **kwargs):
 
     _ret, ret_specd = _pull_out_ret(kwargs, dforig)
     
-    increasing = _read_opt_kwarg(kwargs, 'increasing', None)
-    strict = _read_opt_kwarg(kwargs, 'strict', False)
-    items = _read_opt_kwarg(kwargs, 'items', {k: (increasing, strict) for k in dfcheck})
+    increasing = _read_arg_or_kwarg(args, 0, kwargs, 'increasing', None)
+    strict = _read_arg_or_kwarg(args, 1, kwargs, 'strict', False)
+    items = _read_arg_or_kwarg(args, 2, kwargs, 'items', {k: (increasing, strict) for k in dfcheck})
     
     results = {}
     for col, (increasing, strict) in items.items():
@@ -127,18 +117,7 @@ def _is_monotonic_ret(dforig, dfcheck, dfderive, *args, **kwargs):
     ret_specd['bool'] = list(results.values()).any()
     
     return _ret_proper_objects(_ret, ret_specd)
-
-def _is_monotonic_raize(dforig, dfcheck, dfderive, *args, **kwargs):
-    
-    _raize, _raize_msg, kwargs = _pull_out_raize_kwargs(kwargs)
-    
-    _ret = ('bool',)
-    result = _is_monotonic_ret(dforig, dfcheck, dfderive, _ret=_ret, *args, **kwargs)
-    
-    if not result:
-        return dforig
-    else:
-        raise _raize(_raize_msg)  
+_is_monotonic_raize = _make_generic_raizer(_is_monotonic_ret)
         
 def _acheck_ret(dforig, dfcheck, dfderive, *args, **kwargs):
     
