@@ -16,20 +16,7 @@ from core import CheckSet
 
 none_missing = CheckSet().none_missing
 is_monotonic = CheckSet().is_monotonic
-
-
-def is_shape(df, shape):
-    """
-    Asserts that the DataFrame is of a known shape.
-
-    Parameters
-    ==========
-
-    df: DataFrame
-    shape : tuple (n_rows, n_columns)
-    """
-    assert df.shape == shape
-    return df
+is_shape = CheckSet().is_shape
 
 def unique_index(df):
     """Assert that the index is unique"""

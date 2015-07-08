@@ -26,11 +26,13 @@ def _pull_out_raize_kwargs(kwargs):
     return _raize, _raize_msg, kwargs
 
 
-def _read_opt_kwarg(kwargs, arg, ifnone):
+def _read_arg_or_kwarg(args, pos, kwargs, arg, ifnone):
     if arg in kwargs:
         val = kwargs[arg]
         if val is None:
             val = ifnone
+    elif len(args) >= (pos + 1):
+        val = args[pos]
     else:
         val = ifnone
     return val
@@ -41,12 +43,14 @@ def _ret_proper_objects(_ret, ret_specd):
     if len(ret) == 1:
         return ret[0]
     else:
-        return tuple(ret)    
+        return tuple(ret)
+
+
 def _none_missing_ret(dforig, dfcheck, dfderive, *args, **kwargs):
     
     _ret, ret_specd = _pull_out_ret(kwargs, dforig)
 
-    columns = _read_opt_kwarg(kwargs, 'columns', dfcheck.columns)
+    columns = _read_arg_or_kwarg(args, 0, kwargs, 'columns', dfcheck.columns)
     
     ret_specd['obj'] = dfcheck[columns].isnull()
     ret_specd['ndframe'] = ret_specd['obj'].any()
@@ -55,6 +59,30 @@ def _none_missing_ret(dforig, dfcheck, dfderive, *args, **kwargs):
     return _ret_proper_objects(_ret, ret_specd)
 
 def _none_missing_raize(dforig, dfcheck, dfderive, *args, **kwargs):
+    
+    _raize, _raize_msg, kwargs = _pull_out_raize_kwargs(kwargs)
+    
+    _ret = ('bool',)
+    result = _none_missing_ret(dforig, dfcheck, dfderive, _ret=_ret, *args, **kwargs)
+    
+    if not result:
+        return dforig
+    else:
+        raise _raize(_raize_msg)  
+
+def _is_shape_ret(dforig, dfcheck, dfderive, *args, **kwargs):
+    
+    _ret, ret_specd = _pull_out_ret(kwargs, dforig)
+
+    shape = _read_arg_or_kwarg(args, 0, kwargs, 'shape')
+    
+    ret_specd['obj'] = "is_shape has no output object"
+    ret_specd['ndframe'] = "is_shape has no output ndframe"
+    ret_specd['bool'] = dfcheck.shape == shape
+    
+    return _ret_proper_objects(_ret, ret_specd)
+
+def _is_shape_raize(dforig, dfcheck, dfderive, *args, **kwargs):
     
     _raize, _raize_msg, kwargs = _pull_out_raize_kwargs(kwargs)
     
@@ -214,6 +242,17 @@ class CheckSet(object):
             None is either increasing or decreasing.
         strict: whether the comparison should be strict
         """
+
+    is_shape = _generic_check_maker(_is_shape_ret, _is_shape_raize)
+    is_shape.__doc__ = """
+    Asserts that the DataFrame is of a known shape.
+
+    Parameters
+    ==========
+
+    df: DataFrame
+    shape : tuple (n_rows, n_columns)
+    """
     
     def decorator_maker(self, name, *args, **kwargs):
         def adecorator(*args, **kwargs):

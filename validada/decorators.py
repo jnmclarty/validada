@@ -2,7 +2,7 @@
 from engarde.core import CheckSet
 
 none_missing = CheckSet().decorator_maker('none_missing')
-#is_shape = CheckSet().decorator_maker('is_shape')
+is_shape = CheckSet().decorator_maker('is_shape')
 #unique_index = CheckSet().decorator_maker('unique_index')
 is_monotonic = CheckSet().decorator_maker('is_monotonic')
 #within_set = CheckSet().decorator_maker('within_set')
