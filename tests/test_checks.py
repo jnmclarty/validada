@@ -4,20 +4,89 @@ import numpy as np
 import pandas as pd
 import pandas.util.testing as tm
 
-import engarde.checks as ck
-import engarde.decorators as dc
+from validada.slicers import iloc
+import validada.functions.raising as ck
+import validada.decorators.raising as dc
 
-sc = ck.sc
-scr = ck.scr
-
-Reset = ck.Reset
+import datetime as dt
 
 def _add_one(df):
     return df + 1
 
+def _safe_add_one(df):
+    return df.fillna(0.0) + 1
+    
 def _noop(df):
     return df
 
+def test_is_in_index():
+    dr = pd.date_range(start='2015-01-01', periods=6, freq='D')
+    df = pd.DataFrame(data = range(6), index=dr)
+    
+    d = dt.date(2015,1,3)
+
+    result = ck.has_in_index(df, obj=d)
+    tm.assert_frame_equal(df, result)
+
+    result = dc.has_in_index(obj=d)(_add_one)(df)
+    tm.assert_frame_equal(result, df + 1)
+
+    result = ck.has_in_index(df, obj=d, try_ix=True)
+
+    result = ck.has_in_index(df, obj=d, try_ix=True, try_strftime="%Y-%m")
+
+    result = ck.has_in_index(df, obj=d, check_na=True)
+    
+def test_is_in_index_raises():
+    dr = pd.date_range(start='2015-01-01', periods=6, freq='D')
+    da = range(6)
+    da[2] = pd.np.nan
+    df = pd.DataFrame(data = da, index=dr)
+    
+    d = dt.date(2015,1,12)
+    
+    with pytest.raises(AssertionError):
+        ck.has_in_index(df, obj=d)
+
+    with pytest.raises(AssertionError):
+        dc.has_in_index(obj=d)(_add_one)(df)
+
+    with pytest.raises(AssertionError):
+        ck.has_in_index(df, obj=d, try_ix=True)
+
+    ck.has_in_index(df, obj=d, try_ix=True, try_strftime="%Y-%m")
+    
+    d = dt.datetime(2015,1,3)
+    ck.has_in_index(df, obj=d)
+    ck.has_in_index(df, obj=d, check_na=False)
+    
+    with pytest.raises(AssertionError):
+        ck.has_in_index(df, obj=d, check_na=True)
+        
+def test_equal_columns_sum():
+    df = pd.DataFrame({'A': [1,2,3,4,5], 'B': [1,2,3,4,5]})
+    
+    result = ck.equal_columns_sum(df)
+    tm.assert_frame_equal(df, result)
+
+    result = dc.equal_columns_sum()(_add_one)(df)
+    tm.assert_frame_equal(result, df + 1)
+    
+def test_equal_columns_sum_raises_slice():
+    df = pd.DataFrame({'A': [None,2,3,4,0], 'B': [1,2,3,4,None]})
+    
+    with pytest.raises(AssertionError):
+        ck.equal_columns_sum(df)
+    with pytest.raises(AssertionError):
+        dc.equal_columns_sum()(_add_one)(df)
+
+    s = iloc[-3:]
+    result = ck.equal_columns_sum(df, s)
+    tm.assert_frame_equal(df, result)
+
+    result = dc.equal_columns_sum(s)(_safe_add_one)(df)
+    tm.assert_frame_equal(result, _safe_add_one(df))
+    
 def test_none_missing():
     df = pd.DataFrame(np.random.randn(5, 3))
     result = ck.none_missing(df)
@@ -25,7 +94,6 @@ def test_none_missing():
 
     result = dc.none_missing()(_add_one)(df)
     tm.assert_frame_equal(result, df + 1)
-
 
 def test_none_missing_raises():
     df = pd.DataFrame(np.random.randn(5, 3))
@@ -181,24 +249,12 @@ def test_within_set():
 def test_within_range():
     df = pd.DataFrame({'A': [-1, 0, 1]})
     items = {'A': (-1, 1)}
-    
-    tm.assert_frame_equal(df, sc.within_range(df, items))
-    tm.assert_frame_equal(df, sc[-2].within_range(df, items))
-    sc[:] #sc remembers state, so it would have to be reset
-    tm.assert_frame_equal(df, sc.within_range(df, items))
-
-    tm.assert_frame_equal(df, scr.within_range(df, items))
-    tm.assert_frame_equal(df, scr[-2].within_range(df, items))
-    #scr doesn't remember state, so it wouldn't have to be reset
-    tm.assert_frame_equal(df, scr.within_range(df, items))    
-    
-    #the decorators don't get slice feature, for now...
+    tm.assert_frame_equal(df, ck.within_range(df, items))
     tm.assert_frame_equal(df, dc.within_range(items)(_noop)(df))
 
-    sc[Reset]
     items['A'] = (0, 1)
     with pytest.raises(AssertionError):
-        sc.within_range(df, items)
+        ck.within_range(df, items)
     with pytest.raises(AssertionError):
         dc.within_range(items)(_noop)(df)
 

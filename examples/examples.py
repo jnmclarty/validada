@@ -1,4 +1,4 @@
-from checks import none_missing
+from validada.functions.raising import none_missing
 from slicers import iloc, ix
 
 import pandas as pd
