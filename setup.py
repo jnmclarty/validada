@@ -28,9 +28,9 @@ setup(
         'Programming Language :: Python :: 2.7',
     ],
 
-    keywords='data analysis','engarde', 'validata', 'valid data', 'validada',
+    keywords= ['data analysis','engarde', 'validata', 'valid data', 'validada', 'asster', 'asstr'],
     packages=find_packages(exclude=['tests']),
-    # install_requires=['numpy', 'pandas'],
+    install_requires=['numpy', 'pandas'],
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,
