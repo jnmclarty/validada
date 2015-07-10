@@ -353,9 +353,7 @@ class CheckSet(object):
                 def wrapper(*wargs, **wkwargs):
                     result = func(*wargs, **wkwargs)
                     ans = getattr(self, name)(result, *args, **kwargs)
-                    #if ans:
-                    #    result = [result] + list(ans)
-                    #    result = tuple(result)
+                    result = (result, ans)
                     return result
                 return wrapper
             return decorate
@@ -384,14 +382,17 @@ class RaiseSet(CheckSet):
         
 if __name__ == '__main__':
 
-    df = pd.DataFrame(data=[1,2,3,4], columns=['acol'])
+    df = pd.DataFrame(data={'A' : [1,2,3,4], 'B' : [1,2,3,5]})
     
-    none_missing = CheckSet().none_missing
-    none_missing(df)
+    rs = ReturnSet(('bool','obj'))
+    eqs = rs.equal_columns_sum
+    print eqs(df)
+    
+    print "*" * 10
 
-    none_missing_dec = CheckSet().decorator_maker('none_missing')()
-    
-    @none_missing_dec
+    eqs_dec = rs.decorator_maker('equal_columns_sum')
+#    
+    @eqs_dec()
     def myfunc(adf):
         return adf + 1.0
     
