@@ -40,7 +40,7 @@ The second, is a slice for calculating constants to use during the check.  Both 
 So, say you have a dataframe coming from a source of data, with known "good" data 
 (for instance, before last week), and want to check that the data for just this week is within
 two standard deviations of the data, excluding the latest week of data, you would pass in 
-``iloc[-7:]``` and ``iloc[:-7]`` as arguments to the check.
+```iloc[-7:]``` and ```iloc[:-7]`` as arguments to the check.
 
 ```
 #To use the same functionality of engarde, one would use...
