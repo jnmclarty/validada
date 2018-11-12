@@ -96,9 +96,10 @@ none_missing = rs.decorator_maker('none_missing')
 Dependencies
 ============
 
-- pandas
+- Pandas
 
-Supports python 2.7+  ...would be easy to do 3.4.  Just, lower priority.
+
+Supports python 2.7+  and Python 3.6
 
 
 Overall Design
