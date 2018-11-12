@@ -23,13 +23,13 @@ Instead, users can pass in a slice-like object as an argument.
 How do I pass a slice?
 
 ```python
-from validada.slicers import iloc, loc, ix
+from validada.slicers import iloc, loc
 
 some_check(adf, iloc[-7:], iloc[:-7])
 
 # or...
 
-@some_check(ix[-1], iloc[:-1])
+@some_check(iloc[-1], iloc[:-1])
 def somefunc(adf):
 	return adf + 1.0
 
