@@ -3,12 +3,12 @@ import pandas as pd
 
 import datetime as dt
 
-from slicers import ix
+from .slicers import ix
 from functools import wraps
 from copy import copy
 from collections import Counter
 
-from convenience import _pull_out_ret, _pull_out_raize_kwargs, \
+from .convenience import _pull_out_ret, _pull_out_raize_kwargs, \
                         _read_arg_or_kwarg, _read_required_arg_or_kwarg, \
                         _ret_proper_objects, _make_generic_raizer, \
                         _generic_check_maker, _lop_off_head_if_slice
@@ -123,7 +123,7 @@ def _is_monotonic_ret(dforig, dfcheck, dfderive, *args, **kwargs):
     items = _read_arg_or_kwarg(args, 2, kwargs, 'items', {k: (increasing, strict) for k in dfcheck})
     
     results = {}
-    for col, (increasing, strict) in items.items():
+    for col, (increasing, strict) in list(items.items()):
         s = pd.Index(dfcheck[col])
         if increasing:
             good = getattr(s, 'is_monotonic_increasing')
@@ -155,7 +155,7 @@ def _within_set_ret(dforig, dfcheck, dfderive, *args, **kwargs):
     items = _read_required_arg_or_kwarg(args, 0, kwargs, 'items')
     
     results = {}
-    for k, v in items.items():
+    for k, v in list(items.items()):
         results[k] = not dfcheck[k].isin(v).all()
             
     ret_specd['obj'] = results
@@ -172,7 +172,7 @@ def _within_range_ret(dforig, dfcheck, dfderive, *args, **kwargs):
     items = _read_required_arg_or_kwarg(args, 0, kwargs, 'items')
     
     results = {}
-    for k, (lower, upper) in items.items():
+    for k, (lower, upper) in list(items.items()):
         results[k] = (lower > dfcheck[k]).any() or (upper < dfcheck[k]).any()
 
     ret_specd['obj'] = results
@@ -209,7 +209,7 @@ def _has_dtypes_ret(dforig, dfcheck, dfderive, *args, **kwargs):
     
     results = {}    
     dtypes = dfcheck.dtypes
-    for k, v in items.items():
+    for k, v in list(items.items()):
         results[k] = not dtypes[k] == v
 
     ret_specd['obj'] = results
@@ -395,4 +395,4 @@ if __name__ == '__main__':
     def myfunc(adf):
         return adf + 1.0
     
-    print myfunc(df)
+    print(myfunc(df))

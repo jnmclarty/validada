@@ -21,7 +21,7 @@ def _noop(df):
 
 def test_is_in_index():
     dr = pd.date_range(start='2015-01-01', periods=6, freq='D')
-    df = pd.DataFrame(data = range(6), index=dr)
+    df = pd.DataFrame(data = list(range(6)), index=dr)
     
     d = dt.date(2015,1,3)
 
@@ -39,7 +39,7 @@ def test_is_in_index():
     
 def test_is_in_index_raises():
     dr = pd.date_range(start='2015-01-01', periods=6, freq='D')
-    da = range(6)
+    da = list(range(6))
     da[2] = pd.np.nan
     df = pd.DataFrame(data = da, index=dr)
     

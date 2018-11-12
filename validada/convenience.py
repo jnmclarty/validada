@@ -1,4 +1,4 @@
-from slicers import SliceStore
+from .slicers import SliceStore
 
 def _pull_out_ret(kwargs, dforig):
     try:
@@ -18,7 +18,7 @@ def _pull_out_raize_kwargs(kwargs):
     except KeyError:
         raise KeyError("_raize and _raize_msg must be defined")
         
-    kwargs = {key : value for key, value in kwargs.iteritems() if key not in ('_raize', '_raize_kwargs')}
+    kwargs = {key : value for key, value in kwargs.items() if key not in ('_raize', '_raize_kwargs')}
     
     return _raize, _raize_msg, kwargs
 

@@ -22,8 +22,8 @@ iloc = _index_slicer_factory('iloc')()
 loc = _index_slicer_factory('loc')()
 
 if __name__ == '__main__':
-    print ix
-    print iloc
-    print loc
+    print(ix)
+    print(iloc)
+    print(loc)
     iloc[1:10:2]
-    print iloc
+    print(iloc)
