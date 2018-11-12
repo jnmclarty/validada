@@ -7,7 +7,7 @@ here = path.abspath(path.dirname(__file__))
 setup(
     name='validada',
 
-    version='0.0.1',
+    version='0.0.2',
 
     description='A python package for defensive data analysis.',
     long_description='A python package for defensive data analysis.',
@@ -26,6 +26,7 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.6',
     ],
 
     keywords='data analysis','engarde', 'validata', 'valid data', 'validada',
