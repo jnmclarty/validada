@@ -3,7 +3,8 @@ import pandas as pd
 
 import datetime as dt
 
-from .slicers import ix
+
+from . import slicers
 from functools import wraps
 from copy import copy
 from collections import Counter
@@ -38,7 +39,7 @@ def _has_in_index_ret(dforig, dfcheck, dfderive, *args, **kwargs):
         
     if try_ix:
         try:
-            ans = ans or (len(dfcheck.ix[obj_to_check]) > 0)
+            ans = ans or (len(dfcheck.loc[obj_to_check]) > 0)
         except:
             pass
 
@@ -47,7 +48,7 @@ def _has_in_index_ret(dforig, dfcheck, dfderive, *args, **kwargs):
 
     if check_na:
         try:
-            isna = dfcheck.ix[obj_to_check].isnull()[0]
+            isna = dfcheck.loc[obj_to_check].isnull()[0]
         except:
             isna = True
         ans = not ((not ans) or isna)
@@ -222,8 +223,8 @@ _has_dtypes_raize = _make_generic_raizer(_has_dtypes_ret)
 class CheckSet(object):
     def __init__(self, ret=None, raize=None, msg=""):
         
-        self.check_slc = copy(ix)
-        self.derive_slc = copy(ix)
+        self.check_slc = copy(slicers.loc)
+        self.derive_slc = copy(slicers.loc)
         
         self.ret = ret or ('ndframe', 'bool', 'obj')
         self.raize = raize or AssertionError
@@ -316,7 +317,7 @@ class CheckSet(object):
     equal_columns_sum = _generic_check_maker(_equal_columns_sum_ret, 
                                              _equal_columns_sum_raize)
     equal_columns_sum.__doc__ = """
-    Assert that the sume of two columns are equal
+    Assert that the sum of two columns are equal
 
     Parameters
     ==========
@@ -364,8 +365,8 @@ class CheckSet(object):
 class ReturnSet(CheckSet):
     def __init__(self, ret=None):
         
-        self.check_slc = copy(ix)
-        self.derive_slc = copy(ix)
+        self.check_slc = copy(slicers.loc)
+        self.derive_slc = copy(slicers.loc)
         
         self.ret = ret or ('orig','bool','ndframe','obj')
         self.raize = None
@@ -375,8 +376,8 @@ class ReturnSet(CheckSet):
 class RaiseSet(CheckSet):
     def __init__(self, raize=None, msg=""):
         
-        self.check_slc = copy(ix)
-        self.derive_slc = copy(ix)
+        self.check_slc = copy(slicers.loc)
+        self.derive_slc = copy(slicers.loc)
         
         self.ret = ('orig',)
         self.raize = raize or AssertionError

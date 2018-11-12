@@ -1,12 +1,13 @@
+
 from validada.functions.raising import none_missing
-from slicers import iloc, ix
+from validada.slicers import iloc, loc
 
 import pandas as pd
 
 # Create some data...
 ind = pd.date_range('2010', '2015', freq='A')
 adf = pd.DataFrame({'one' : list(range(5)), 'two' : [ i ** 2 for i in range(5)]}, index=ind)
-adf.ix[4,'two'] = pd.np.NaN
+adf['two'].iloc[4]=pd.np.NaN
 
 """
             one  two
@@ -61,20 +62,20 @@ except:
 
 # Now for some real fun...
 
-from core import RaiseSet
+from  validada.core import RaiseSet
 
 rs = RaiseSet(IOError, "IO error makes no sense, but why not?")
 none_missing = rs.none_missing
 
 try:
-    none_missing(adf, ix['2013':])
+    none_missing(adf, loc['2013':])
 except IOError as e:
-    print(e.message)
+    print(str(e))
 
 #This is only needed, since the user has added a custom exception message...
 none_missing = rs.decorator_maker('none_missing')
 
-@none_missing(ix['2013':])
+@none_missing(loc['2013':])
 def somefunc(anydf):
     soln = anydf + 1.0
     return soln
@@ -83,15 +84,15 @@ try:
     somefunc(adf)
 except IOError as e:
     print("Second time the charm?")
-    print(e.message)
+    print(str(e))
 
-from core import ReturnSet
+from validada.core import ReturnSet
 
 rs = ReturnSet(('bool', 'obj'))
 none_missing = rs.none_missing
 
 print("Since we specified 'bool' and 'obj':")
-a_bool, an_obj = none_missing(adf, ix['2013':], columns='one')
+a_bool, an_obj = none_missing(adf, loc['2013':], columns='one')
 #a_bool, is the result of the check
 print(a_bool)
 #an_obj, is a none_missing specific object, it's a way to get other information out of the check.
